@@ -20,6 +20,13 @@ app.get("/allToys/:id", async (req, res) => {
   res.send();
 });
 
+app.patch("/allToys/:id", async (req, res) => {
+  const id = req.params.id;
+  const updatedToy = req.body;
+  const query = { _id: new ObjectId(id) };
+  res.send();
+});
+
 app.listen(port, () => {
   console.log(`listening on prot ${port}`);
 });
