@@ -10,6 +10,10 @@ app.get("/", (req, res) => {
   res.send("Hallo baby toy server");
 });
 
+app.get("/allToys", async (req, res) => {
+  res.send();
+});
+
 app.listen(port, () => {
   console.log(`listening on prot ${port}`);
 });
