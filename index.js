@@ -31,8 +31,12 @@ async function run() {
     // Connect the client to the server	(optional starting in v4.7)
     await client.connect();
 
+    const database = client.db("ToyGalaxy");
+    const products = database.collection("products");
+
     app.get("/allToys", async (req, res) => {
-      res.send();
+      const result = await products.find().toArray();
+      res.send(result);
     });
 
     app.get("/allToys/:id", async (req, res) => {
