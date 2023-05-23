@@ -6,11 +6,19 @@ const { MongoClient, ServerApiVersion } = require("mongodb");
 const port = process.env.PORT || 5000;
 const app = express();
 app.use(express.json());
+
 app.use(cors());
 
 app.get("/", (req, res) => {
   res.send("Hallo baby toy server");
 });
+
+// const page = parseInt(req.query.page) || 0;
+// const limit = parseInt(req.query.limit) || 10;
+// const skip = page * limit;
+
+// const result = await productCollection.find().skip(skip).limit(limit).toArray();
+// res.send(result);
 
 const db_user = process.env.DB_USER;
 const db_pass = process.env.DB_PASS;
@@ -35,8 +43,24 @@ async function run() {
     const products = database.collection("products");
 
     app.get("/allToys", async (req, res) => {
-      const result = await products.find().toArray();
+      const page = parseInt(req.query.page) || 0;
+      // const limit = parseInt(req.query.limit) || 10;
+      const limit = 20;
+      const skip = page * limit;
+      const query = req.query.toy_name
+        ? {
+            toy_name: { $regex: new RegExp(req.query.toy_name, "i") },
+          }
+        : {};
+      const result = await products
+        .find(query)
+        .skip(skip)
+        .limit(limit)
+        .toArray();
       res.send(result);
+
+      // const result = await products.find().toArray();
+      // res.send(result);
     });
     app.post("/allToys", async (req, res) => {
       const newToy = req.body;
@@ -51,14 +75,12 @@ async function run() {
       res.send(result);
     });
 
-    app.get("/getToyByQuery", async (req, res) => {
+    app.get("/myToys", async (req, res) => {
       const queryUrl = req.query;
-      const field = Object.keys(queryUrl);
       const query = {
-        [field]: { $regex: new RegExp(queryUrl[field], "i") },
+        seller_email: { $regex: new RegExp(queryUrl.seller_email, "i") },
       };
-      const result = await products.find(query).toArray();
-      console.log(queryUrl,result)
+      const result = await products.find(query).limit(20).toArray();
       res.send(result);
     });
 
@@ -67,7 +89,15 @@ async function run() {
       const updatedToy = req.body;
       const query = { _id: new ObjectId(id) };
       const result = await products.updateOne(query, { $set: updatedToy });
-      console.log(result);
+      res.send(result);
+    });
+
+    app.get("/getByCategory", async (req, res) => {
+      const queryUrl = req.query;
+      const query = {
+        sub_category: { $regex: new RegExp(queryUrl.sub_category, "i") },
+      };
+      const result = await products.find(query).limit(20).toArray();
       res.send(result);
     });
 
@@ -75,7 +105,6 @@ async function run() {
       const id = req.params.id;
       const query = { _id: new ObjectId(id) };
       const result = await products.deleteOne(query);
-      console.log(result)
       res.send(result);
     });
 
