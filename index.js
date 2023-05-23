@@ -38,24 +38,45 @@ async function run() {
       const result = await products.find().toArray();
       res.send(result);
     });
+    app.post("/allToys", async (req, res) => {
+      const newToy = req.body;
+      const result = await products.insertOne(newToy);
+      res.send(result);
+    });
 
     app.get("/allToys/:id", async (req, res) => {
       const id = req.params.id;
       const query = { _id: new ObjectId(id) };
-      res.send();
+      const result = await products.findOne(query);
+      res.send(result);
     });
 
-    app.patch("/allToys/:id", async (req, res) => {
+    app.get("/getToyByQuery", async (req, res) => {
+      const queryUrl = req.query;
+      const field = Object.keys(queryUrl);
+      const query = {
+        [field]: { $regex: new RegExp(queryUrl[field], "i") },
+      };
+      const result = await products.find(query).toArray();
+      console.log(queryUrl,result)
+      res.send(result);
+    });
+
+    app.put("/allToys/:id", async (req, res) => {
       const id = req.params.id;
       const updatedToy = req.body;
       const query = { _id: new ObjectId(id) };
-      res.send();
+      const result = await products.updateOne(query, { $set: updatedToy });
+      console.log(result);
+      res.send(result);
     });
 
     app.delete("/myToys/:id", async (req, res) => {
       const id = req.params.id;
       const query = { _id: new ObjectId(id) };
-      res.send();
+      const result = await products.deleteOne(query);
+      console.log(result)
+      res.send(result);
     });
 
     // Send a ping to confirm a successful connection
